@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Trình soạn thảo / công cụ
+.vscode/
+.idea/
+.omc/
+.claude/
+
+# File nhận được khi test gửi file (giữ lại thư mục bằng .gitkeep)
+downloads/*
+!downloads/.gitkeep
+
+# File bắt gói Wireshark (rất lớn). Ảnh chụp màn hình (docs/img/*.png) VẪN được commit.
+*.pcapng
+*.pcap
+
+# File thử nghiệm nặng khi test gửi file
+samples/
