@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 575" width="900" role="img" aria-label="Kiến trúc tổng thể của chương trình LAN Chat">
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/></marker>
+  <style>
+    text{font-family:"Segoe UI",Arial,sans-serif;font-size:14px;fill:#1f2937}
+    .t{font-weight:700;font-size:16px}
+    .s{font-size:12.5px;fill:#374151}
+    .n{font-size:12px;fill:#6b7280}
+    .l{stroke:#4b5563;stroke-width:1.6;fill:none;marker-end:url(#a)}
+  </style>
+</defs>
+<rect width="900" height="575" fill="#ffffff"/>
+
+<rect x="300" y="12" width="300" height="42" rx="10" fill="#f3f4f6" stroke="#9ca3af"/>
+<text x="450" y="38" text-anchor="middle" class="t">Người dùng (bàn phím · màn hình)</text>
+<path class="l" d="M380,54 L225,92"/>
+
+<rect x="60" y="92" width="330" height="72" rx="10" fill="#ede9fe" stroke="#7c3aed"/>
+<text x="75" y="116" class="t">ui.py</text>
+<text x="75" y="136" class="s">Giao diện console: dòng nhập luôn ở cuối,</text>
+<text x="75" y="153" class="s">tin đến chèn phía trên, đọc từng phím</text>
+<rect x="510" y="92" width="330" height="72" rx="10" fill="#ede9fe" stroke="#7c3aed"/>
+<text x="525" y="116" class="t">lanchat.py</text>
+<text x="525" y="136" class="s">Điểm vào: đọc tham số, khởi động các thread,</text>
+<text x="525" y="153" class="s">bảng lệnh /list /chat /send /leave /status</text>
+<path class="l" d="M390,128 L510,128"/>
+<text x="450" y="120" text-anchor="middle" class="n">dòng đã gõ</text>
+
+<path class="l" d="M600,164 L185,200"/>
+<path class="l" d="M640,164 L440,200"/>
+<path class="l" d="M720,164 L740,200"/>
+
+<rect x="60" y="200" width="250" height="92" rx="10" fill="#fff4de" stroke="#d97706"/>
+<text x="75" y="224" class="t">discovery.py (UDP)</text>
+<text x="75" y="244" class="s">Phát HELLO mỗi 3 giây, nghe HELLO,</text>
+<text x="75" y="261" class="s">danh sách online, thông báo vào/ra,</text>
+<text x="75" y="278" class="s">trạng thái online / away</text>
+<rect x="320" y="200" width="240" height="92" rx="10" fill="#e3eeff" stroke="#2563eb"/>
+<text x="335" y="224" class="t">tcp_chat.py (TCP)</text>
+<text x="335" y="244" class="s">Acceptor, mỗi kết nối một thread</text>
+<text x="335" y="261" class="s">nhận tin, mở chat, gửi tin,</text>
+<text x="335" y="278" class="s">tin chưa đọc, rời chat</text>
+<rect x="620" y="200" width="240" height="92" rx="10" fill="#dcf5ee" stroke="#0d9488"/>
+<text x="635" y="224" class="t">filetransfer.py (TCP)</text>
+<text x="635" y="244" class="s">Gửi/nhận file ở thread riêng,</text>
+<text x="635" y="261" class="s">tiến độ %, lưu vào downloads/,</text>
+<text x="635" y="278" class="s">xóa file dở khi lỗi</text>
+<path class="l" d="M560,246 L620,246" stroke-dasharray="5 4"/>
+<text x="590" y="238" text-anchor="middle" class="n">file</text>
+
+<path class="l" d="M440,292 L440,328"/>
+<path class="l" d="M740,292 L740,328"/>
+<rect x="320" y="328" width="540" height="54" rx="10" fill="#e3eeff" stroke="#2563eb"/>
+<text x="335" y="351" class="t">protocol.py</text>
+<text x="335" y="371" class="s">Khung tin TCP HI · MSG · FILE · BYE — luôn đọc đúng N byte; mở và đóng kết nối</text>
+<rect x="60" y="328" width="250" height="54" rx="10" fill="#ffffff" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<text x="75" y="351" class="s">Gói UDP HELLO (nằm trong</text>
+<text x="75" y="368" class="s">discovery.py, định dạng 1 dòng)</text>
+<path class="l" d="M185,292 L185,328"/>
+
+<rect x="40" y="406" width="820" height="86" rx="12" fill="none" stroke="#9ca3af" stroke-dasharray="6 4"/>
+<text x="852" y="486" text-anchor="end" class="n">Mạng LAN / Wi-Fi</text>
+<path class="l" d="M185,382 L185,420"/>
+<path class="l" d="M590,382 L590,420"/>
+<rect x="60" y="420" width="250" height="46" rx="10" fill="#fff4de" stroke="#d97706"/>
+<text x="185" y="448" text-anchor="middle" class="t">UDP broadcast · cổng 9999</text>
+<rect x="320" y="420" width="540" height="46" rx="10" fill="#e3eeff" stroke="#2563eb"/>
+<text x="590" y="448" text-anchor="middle" class="t">TCP · mỗi người một cổng (chat và gửi file)</text>
+
+<rect x="40" y="510" width="820" height="52" rx="10" fill="#dcfce7" stroke="#16a34a"/>
+<text x="55" y="533" class="t">state.py — dữ liệu dùng chung, có khóa</text>
+<text x="55" y="551" class="s">Người online · kết nối chat · người đang chat cùng · tin chưa đọc · lịch sử · cờ dừng.  Mọi file phía trên đọc/ghi qua các hàm của file này.</text>
+</svg>

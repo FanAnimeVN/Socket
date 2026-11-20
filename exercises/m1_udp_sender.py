@@ -1,24 +1,42 @@
 """
-BÀI TẬP M1.4 - UDP BROADCAST SENDER   (CẢ 3 NGƯỜI TỰ LÀM, ngày D2)
+exercises/m1_udp_sender.py - BÀI M1.4: UDP BROADCAST SENDER (nền của discovery.py).
 
-Chạy receiver trước (m1_udp_receiver.py), rồi chạy file này.
+Chạy receiver trước (m1_udp_receiver.py), rồi chạy file này:
+    python exercises/m1_udp_sender.py A                    (broadcast 255.255.255.255)
+    python exercises/m1_udp_sender.py A 127.255.255.255    (máy không có mạng: gợi ý của đề)
+    python exercises/m1_udp_sender.py A 192.168.1.255      (địa chỉ broadcast của mạng bạn)
 
-CÁC BƯỚC:
-  1. Tạo socket UDP; bật SO_BROADCAST (không bật thì sendto tới địa chỉ broadcast bị từ chối: thử xem lỗi gì).
-  2. Dựng gói giống giao thức thật:  "HELLO|A|5001|online"  rồi .encode("utf-8")
-  3. Vòng lặp: sendto(gói, ("255.255.255.255", 9999)); in "đã gửi"; chờ 3 giây (time.sleep(3)).
-  4. Ctrl+C thì thoát gọn (bắt KeyboardInterrupt).
-
-THÍ NGHIỆM:
+THÍ NGHIỆM (ghi kết quả vào docs/NHAT_KY.md):
   - 2 receiver cùng nhận được không? Vì sao (broadcast gửi cho "tất cả")?
-  - Đổi địa chỉ đích thành "127.255.255.255" (trường hợp máy không có mạng, gợi ý của đề): có nhận không?
-  - Đổi thành địa chỉ broadcast của mạng bạn (vd 192.168.1.255 nếu mạng là 192.168.1.x): có nhận không?
+  - Bỏ dòng SO_BROADCAST: sendto tới địa chỉ broadcast báo lỗi gì?
   - Trên 2 máy thật cùng Wi-Fi: máy kia có nhận được không? Nếu không -> Firewall? Wi-Fi bật "client isolation"?
-    (Ghi lại: đây là rủi ro lớn nhất của buổi demo.)
-  - Mở Wireshark (xem docs/WIRESHARK.md), filter  udp.port == 9999  -> thấy gói của bạn chưa? Địa chỉ đích là gì?
+  - Mở Wireshark (docs/WIRESHARK.md), filter  udp.port == 9999: thấy gói chưa? Địa chỉ đích là gì?
 
-TỰ KIỂM TRA:
-  - Broadcast khác unicast ở đâu? Vì sao router không chuyển tiếp broadcast ra Internet?
-  - Vì sao đề chọn UDP (không phải TCP) cho việc "tôi đang online"?
+TỰ KIỂM TRA: Broadcast khác unicast ở đâu? Vì sao router không chuyển tiếp broadcast ra Internet?
+             Vì sao đề chọn UDP (không phải TCP) cho việc "tôi đang online"?
 """
-# TODO: viết code ở đây
+import socket
+import sys
+import time
+
+PORT = 9999
+
+
+def main():
+    name = sys.argv[1] if len(sys.argv) > 1 else "sender"
+    bcast = sys.argv[2] if len(sys.argv) > 2 else "255.255.255.255"
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)    # bắt buộc bật thì mới gửi tới địa chỉ broadcast được
+    packet = f"HELLO|{name}|5001|online".encode("utf-8")          # gói giống giao thức thật
+    print(f"[{name}] broadcasting {packet.decode()} to {bcast}:{PORT} every 3 s (Ctrl+C to stop)")
+    try:
+        while True:
+            sock.sendto(packet, (bcast, PORT))
+            print(f"[{name}] sent")
+            time.sleep(3)
+    except KeyboardInterrupt:
+        print("\nbye")
+
+
+if __name__ == "__main__":
+    main()

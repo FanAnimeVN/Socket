@@ -4,6 +4,9 @@
 **Lập ngày:** Chủ nhật 15/11/2026 · **Hạn nội bộ:** Thứ Bảy 28/11/2026 (hạn thật ~29/11 coi như ngày dự phòng khẩn cấp)
 **Giả định thời gian:** thứ 2–6 ≈ 2 giờ/người/ngày, cuối tuần ≈ 3–4 giờ/người/ngày → tổng ≈ 30–35 giờ/người. Nếu ngày nào bận thi/bài tập môn khác, ghi vào Day 0 và dời việc sang ngày khác, **không dồn sang D12–D13**.
 
+> **Cập nhật 20/11:** phần code (D1–D9 trong lộ trình mục 5) **đã xong** và có test tự động; xem mục 12 và `README.md`.
+> Việc còn lại đi thẳng tới D10–D13: test 2 máy thật, ma trận lỗi (mục 9), ảnh Wireshark, báo cáo, vấn đáp, demo.
+
 ---
 
 ## 0. Nguyên tắc làm việc (để vấn đáp được)
@@ -270,6 +273,14 @@ Mỗi người viết phần của module mình; Ngọc ghép và thống nhất
 
 ---
 
-## 12. Dùng trợ giúp từ Claude đúng cách (theo yêu cầu "tự code")
+## 12. Về việc dùng Claude (cập nhật 20/11)
 
-Phù hợp: giải thích khái niệm, giải thích traceback, đặt câu hỏi vấn đáp thử, chỉ ra điểm đáng ngờ trong code **do nhóm viết** (không viết lại hộ). Không phù hợp: nhờ viết hộ module rồi chép.
+Do thời gian gấp, **nhóm đã quyết định để Claude viết toàn bộ code** (thay cho kế hoạch tự viết ban đầu ở mục 0 và 5).
+Hệ quả cần nhớ:
+- Đề có vấn đáp: bất kỳ ai cũng có thể bị hỏi bất kỳ hàm nào. Mỗi người phải **đọc hiểu phần của mình** theo
+  `docs/HUONG_DAN_DOC_CODE.md` (mỗi file có khung chú thích việc/luồng/bẫy) và luyện ngân hàng câu hỏi ở mục 8.
+- **Hỏi giảng viên** quy định "tự code" của môn có cho dùng code do AI viết không (ghi vào `docs/NHAT_KY.md` mục 3).
+  Nếu không cho, cần báo sớm để quyết định cách xử lý, đừng để đến lúc vấn đáp.
+- Phần nhóm **bắt buộc tự làm** (không thể thay bằng chương trình): test trên 2 máy thật, ảnh Wireshark, đọc lại và xuất
+  báo cáo, diễn tập demo 10 phút.
+- Các bài `exercises/` (Milestone 1) đã có lời giải chạy được; nên tự gõ lại ít nhất một lần để hiểu.

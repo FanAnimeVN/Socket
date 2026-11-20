@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" width="900" role="img" aria-label="Định dạng gói tin UDP và các frame TCP">
+<defs>
+  <style>
+    text{font-family:"Segoe UI",Arial,sans-serif;font-size:13.5px;fill:#1f2937}
+    .h{font-weight:700;font-size:15px}
+    .b{font-weight:700;font-size:14px}
+    .s{font-size:12px;fill:#4b5563}
+    .m{font-family:Consolas,"Courier New",monospace;font-size:14px}
+    .sep{font-family:Consolas,"Courier New",monospace;font-size:18px;font-weight:700;fill:#6b7280}
+  </style>
+</defs>
+<rect width="900" height="540" fill="#ffffff"/>
+
+<text x="30" y="28" class="h">UDP — gói HELLO (một datagram, gửi broadcast mỗi 3 giây)</text>
+<rect x="30" y="42" width="110" height="40" rx="6" fill="#fff4de" stroke="#d97706"/><text x="85" y="67" text-anchor="middle" class="b">HELLO</text>
+<text x="150" y="68" class="sep">|</text>
+<rect x="166" y="42" width="170" height="40" rx="6" fill="#fff4de" stroke="#d97706"/><text x="251" y="67" text-anchor="middle" class="b">tên</text>
+<text x="346" y="68" class="sep">|</text>
+<rect x="362" y="42" width="170" height="40" rx="6" fill="#fff4de" stroke="#d97706"/><text x="447" y="67" text-anchor="middle" class="b">cổng TCP</text>
+<text x="542" y="68" class="sep">|</text>
+<rect x="558" y="42" width="170" height="40" rx="6" fill="#fff4de" stroke="#d97706"/><text x="643" y="67" text-anchor="middle" class="b">trạng thái</text>
+<text x="85" y="100" text-anchor="middle" class="s">loại gói</text>
+<text x="251" y="100" text-anchor="middle" class="s">duy nhất, không chứa |</text>
+<text x="447" y="100" text-anchor="middle" class="s">số từ 1 đến 65535</text>
+<text x="643" y="100" text-anchor="middle" class="s">online hoặc away</text>
+<text x="30" y="128" class="s">Ví dụ (22 byte):</text><text x="140" y="128" class="m">HELLO|Quan|5000|online</text>
+
+<line x1="20" y1="148" x2="880" y2="148" stroke="#d1d5db"/>
+<text x="30" y="176" class="h">TCP — các frame (header kết thúc bằng dấu |, bên nhận luôn đọc đúng số byte)</text>
+
+<!-- HI -->
+<rect x="30" y="192" width="70" height="38" rx="6" fill="#e3eeff" stroke="#2563eb"/><text x="65" y="216" text-anchor="middle" class="b">HI</text>
+<text x="108" y="217" class="sep">|</text>
+<rect x="124" y="192" width="190" height="38" rx="6" fill="#e3eeff" stroke="#2563eb"/><text x="219" y="216" text-anchor="middle" class="b">tên người gửi</text>
+<text x="322" y="217" class="sep">|</text>
+<rect x="338" y="192" width="190" height="38" rx="6" fill="#e3eeff" stroke="#2563eb"/><text x="433" y="216" text-anchor="middle" class="b">kind: chat hoặc file</text>
+<text x="536" y="217" class="sep">|</text>
+<text x="570" y="216" class="s">frame ĐẦU TIÊN của mọi kết nối: cho biết</text><text x="570" y="232" class="s">ai gọi tới và để chat hay gửi file</text>
+
+<!-- MSG -->
+<rect x="30" y="252" width="70" height="38" rx="6" fill="#e3eeff" stroke="#2563eb"/><text x="65" y="276" text-anchor="middle" class="b">MSG</text>
+<text x="108" y="277" class="sep">|</text>
+<rect x="124" y="252" width="130" height="38" rx="6" fill="#e3eeff" stroke="#2563eb"/><text x="189" y="276" text-anchor="middle" class="b">length</text>
+<text x="262" y="277" class="sep">|</text>
+<rect x="278" y="252" width="320" height="38" rx="6" fill="#bfdbfe" stroke="#2563eb"/><text x="438" y="276" text-anchor="middle" class="b">nội dung: đúng length BYTE (UTF-8)</text>
+<text x="610" y="270" class="s">length đếm BYTE, không phải ký tự</text>
+
+<!-- FILE -->
+<rect x="30" y="312" width="70" height="38" rx="6" fill="#dcf5ee" stroke="#0d9488"/><text x="65" y="336" text-anchor="middle" class="b">FILE</text>
+<text x="108" y="337" class="sep">|</text>
+<rect x="124" y="312" width="130" height="38" rx="6" fill="#dcf5ee" stroke="#0d9488"/><text x="189" y="336" text-anchor="middle" class="b">tên file</text>
+<text x="262" y="337" class="sep">|</text>
+<rect x="278" y="312" width="100" height="38" rx="6" fill="#dcf5ee" stroke="#0d9488"/><text x="328" y="336" text-anchor="middle" class="b">size</text>
+<text x="386" y="337" class="sep">|</text>
+<rect x="402" y="312" width="320" height="38" rx="6" fill="#99e2d3" stroke="#0d9488"/><text x="562" y="336" text-anchor="middle" class="b">các byte của file (đúng size byte)</text>
+<text x="402" y="370" class="s">byte của file gửi theo từng khối 64 KB, trên kết nối TCP riêng</text>
+
+<!-- BYE -->
+<rect x="30" y="392" width="70" height="38" rx="6" fill="#e3eeff" stroke="#2563eb"/><text x="65" y="416" text-anchor="middle" class="b">BYE</text>
+<text x="108" y="417" class="sep">|</text>
+<text x="140" y="416" class="s">rời chat lịch sự (lệnh /leave hoặc /quit)</text>
+
+<line x1="20" y1="450" x2="880" y2="450" stroke="#d1d5db"/>
+<rect x="30" y="464" width="840" height="62" rx="10" fill="#fefce8" stroke="#ca8a04"/>
+<text x="46" y="488" class="b">Vì sao length phải là số BYTE?</text>
+<text x="46" y="508" class="s">"Xin chào" có 8 ký tự nhưng 9 byte (chữ à chiếm 2 byte trong UTF-8) nên frame là MSG|9|Xin chào. Nếu ghi 8, bên nhận đọc thiếu</text>
+<text x="46" y="522" class="s">1 byte và mọi frame sau đó bị lệch. Đã kiểm chứng bằng byte thật trên dây (docs/evidence/wire_format.txt).</text>
+</svg>

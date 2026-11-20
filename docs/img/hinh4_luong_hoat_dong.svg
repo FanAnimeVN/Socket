@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720" width="900" role="img" aria-label="Luồng hoạt động giữa hai máy: phát hiện, bắt tay TCP, chat, gửi file, rời chat">
+<defs>
+  <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d97706"/></marker>
+  <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+  <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#0d9488"/></marker>
+  <style>
+    text{font-family:"Segoe UI",Arial,sans-serif;font-size:13.5px;fill:#1f2937}
+    .t{font-weight:700;font-size:15px}
+    .m{font-family:Consolas,"Courier New",monospace;font-size:13px}
+    .s{font-size:12px;fill:#6b7280}
+    .d{font-weight:700;font-size:13px;fill:#374151}
+    .uo{stroke:#d97706;stroke-width:2;marker-end:url(#o)}
+    .tb{stroke:#2563eb;stroke-width:2;marker-end:url(#b)}
+    .tg{stroke:#0d9488;stroke-width:2;marker-end:url(#g)}
+  </style>
+</defs>
+<rect width="900" height="720" fill="#ffffff"/>
+
+<rect x="90" y="12" width="180" height="40" rx="8" fill="#ede9fe" stroke="#7c3aed"/><text x="180" y="38" text-anchor="middle" class="t">Máy A (Quan)</text>
+<rect x="630" y="12" width="180" height="40" rx="8" fill="#ede9fe" stroke="#7c3aed"/><text x="720" y="38" text-anchor="middle" class="t">Máy B (Minh)</text>
+<line x1="180" y1="52" x2="180" y2="710" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<line x1="720" y1="52" x2="720" y2="710" stroke="#9ca3af" stroke-dasharray="5 4"/>
+
+<text x="450" y="82" text-anchor="middle" class="d">1. Phát hiện bằng UDP (lặp mỗi 3 giây, không cần bắt tay)</text>
+<line class="uo" x1="180" y1="118" x2="716" y2="118"/>
+<text x="448" y="108" text-anchor="middle" class="m">HELLO|Quan|5000|online</text>
+<text x="448" y="134" text-anchor="middle" class="s">gửi tới địa chỉ broadcast, cổng 9999 — mọi máy trong LAN đều nhận được</text>
+<line class="uo" x1="720" y1="170" x2="184" y2="170"/>
+<text x="448" y="160" text-anchor="middle" class="m">HELLO|Minh|6000|online</text>
+<text x="448" y="186" text-anchor="middle" class="s">hai bên cập nhật danh sách online và báo "is online"</text>
+
+<rect x="30" y="204" width="840" height="26" rx="6" fill="#f3f4f6"/><text x="450" y="222" text-anchor="middle" class="d">2. Quan gõ /chat Minh → mở kết nối TCP (bắt tay 3 bước)</text>
+<line class="tb" x1="180" y1="256" x2="716" y2="256"/><text x="448" y="250" text-anchor="middle" class="m">SYN</text>
+<line class="tb" x1="720" y1="286" x2="184" y2="286"/><text x="448" y="280" text-anchor="middle" class="m">SYN, ACK</text>
+<line class="tb" x1="180" y1="316" x2="716" y2="316"/><text x="448" y="310" text-anchor="middle" class="m">ACK</text>
+<line class="tb" x1="180" y1="352" x2="716" y2="352"/><text x="448" y="346" text-anchor="middle" class="m">HI|Quan|chat|</text>
+<text x="448" y="368" text-anchor="middle" class="s">frame đầu tiên: Minh biết kết nối này của Quan và dùng để chat</text>
+
+<rect x="30" y="384" width="840" height="26" rx="6" fill="#f3f4f6"/><text x="450" y="402" text-anchor="middle" class="d">3. Chat hai chiều trên cùng một kết nối</text>
+<line class="tb" x1="180" y1="436" x2="716" y2="436"/><text x="448" y="430" text-anchor="middle" class="m">MSG|5|Hello</text>
+<line class="tb" x1="720" y1="470" x2="184" y2="470"/><text x="448" y="464" text-anchor="middle" class="m">MSG|3|Hi!</text>
+
+<rect x="30" y="486" width="840" height="26" rx="6" fill="#f3f4f6"/><text x="450" y="504" text-anchor="middle" class="d">4. Quan gõ /send slides.pdf → kết nối TCP RIÊNG, ở thread riêng (chat vẫn chạy)</text>
+<line class="tg" x1="180" y1="534" x2="716" y2="534"/><text x="448" y="528" text-anchor="middle" class="s">kết nối TCP mới (lại bắt tay 3 bước)</text>
+<line class="tg" x1="180" y1="568" x2="716" y2="568"/><text x="448" y="562" text-anchor="middle" class="m">HI|Quan|file|</text>
+<line class="tg" x1="180" y1="602" x2="716" y2="602"/><text x="448" y="596" text-anchor="middle" class="m">FILE|slides.pdf|2516582|</text>
+<line class="tg" x1="180" y1="636" x2="716" y2="636"/><text x="448" y="630" text-anchor="middle" class="s">2516582 byte, từng khối 64 KB, báo tiến độ mỗi 10%</text>
+
+<rect x="30" y="652" width="840" height="26" rx="6" fill="#f3f4f6"/><text x="450" y="670" text-anchor="middle" class="d">5. Quan gõ /leave</text>
+<line class="tb" x1="180" y1="700" x2="716" y2="700"/><text x="448" y="694" text-anchor="middle" class="m">BYE|</text>
+</svg>

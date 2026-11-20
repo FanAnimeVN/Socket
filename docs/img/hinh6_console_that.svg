@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 536 202" width="536" role="img" aria-label="Màn hình console thật: tin nhắn chèn lên trên, dòng nhập giữ nguyên chữ đang gõ"><style>text{font-family:Consolas,"Cascadia Mono","Courier New",monospace;font-size:13.5px;white-space:pre}.bar{font-family:"Segoe UI",Arial,sans-serif;font-size:12px;fill:#9ca3af}</style>
+<g transform="translate(0,0)">
+<rect width="536" height="202" rx="9" fill="#111827"/>
+<rect width="536" height="26" rx="9" fill="#1f2937"/><rect y="14" width="536" height="12" fill="#1f2937"/>
+<circle cx="16" cy="13" r="5" fill="#ef4444"/><circle cx="32" cy="13" r="5" fill="#f59e0b"/><circle cx="48" cy="13" r="5" fill="#22c55e"/>
+<text x="64" y="17" class="bar">Console Windows THẬT - tin đến lúc đang gõ dở</text>
+<text x="16" y="48" fill="#93c5fd" xml:space="preserve">[*] Checking that the name 'Con' is free (3.5 s) ...</text>
+<text x="16" y="67" fill="#93c5fd" xml:space="preserve">[*] Listening on TCP port 49680</text>
+<text x="16" y="86" fill="#93c5fd" xml:space="preserve">[*] Broadcasting presence on UDP port 9999 (to 127.255.255.255)</text>
+<text x="16" y="105" fill="#93c5fd" xml:space="preserve">[*] Type /help for the list of commands</text>
+<text x="16" y="124" fill="#93c5fd" xml:space="preserve">[*] Peer is online</text>
+<text x="16" y="143" fill="#93c5fd" xml:space="preserve">[*] Switched to Peer</text>
+<text x="16" y="162" fill="#86efac" xml:space="preserve">[Peer] ok, which part?</text>
+<text x="16" y="181" fill="#fde68a" xml:space="preserve">&gt; you can che</text>
+</g>
+</svg>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1072 278" width="1072" role="img" aria-label="Gửi file 3 MB có tiến độ trong lúc vẫn chat; máy nhận lưu file"><style>text{font-family:Consolas,"Cascadia Mono","Courier New",monospace;font-size:13.5px;white-space:pre}.bar{font-family:"Segoe UI",Arial,sans-serif;font-size:12px;fill:#9ca3af}</style>
+<g transform="translate(0,0)">
+<rect width="456" height="278" rx="9" fill="#111827"/>
+<rect width="456" height="26" rx="9" fill="#1f2937"/><rect y="14" width="456" height="12" fill="#1f2937"/>
+<circle cx="16" cy="13" r="5" fill="#ef4444"/><circle cx="32" cy="13" r="5" fill="#f59e0b"/><circle cx="48" cy="13" r="5" fill="#22c55e"/>
+<text x="64" y="17" class="bar">Máy gửi (TestA)</text>
+<text x="16" y="48" fill="#86efac" xml:space="preserve">[TestA] chat during transfer</text>
+<text x="16" y="67" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin (3.0 MB) ...</text>
+<text x="16" y="86" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 10%</text>
+<text x="16" y="105" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 20%</text>
+<text x="16" y="124" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 31%</text>
+<text x="16" y="143" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 41%</text>
+<text x="16" y="162" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 52%</text>
+<text x="16" y="181" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 62%</text>
+<text x="16" y="200" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 72%</text>
+<text x="16" y="219" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 83%</text>
+<text x="16" y="238" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin ... 93%</text>
+<text x="16" y="257" fill="#93c5fd" xml:space="preserve">[*] Sending bao cao test.bin (3.0 MB) ... 100%  Done.</text>
+</g>
+<g transform="translate(472,0)">
+<rect width="600" height="278" rx="9" fill="#111827"/>
+<rect width="600" height="26" rx="9" fill="#1f2937"/><rect y="14" width="600" height="12" fill="#1f2937"/>
+<circle cx="16" cy="13" r="5" fill="#ef4444"/><circle cx="32" cy="13" r="5" fill="#f59e0b"/><circle cx="48" cy="13" r="5" fill="#22c55e"/>
+<text x="64" y="17" class="bar">Máy nhận (TestB)</text>
+<text x="16" y="48" fill="#86efac" xml:space="preserve">[TestA] chat during transfer</text>
+<text x="16" y="67" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin (3.0 MB) from TestA ...</text>
+<text x="16" y="86" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 10%</text>
+<text x="16" y="105" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 20%</text>
+<text x="16" y="124" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 31%</text>
+<text x="16" y="143" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 41%</text>
+<text x="16" y="162" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 52%</text>
+<text x="16" y="181" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 62%</text>
+<text x="16" y="200" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 72%</text>
+<text x="16" y="219" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 83%</text>
+<text x="16" y="238" fill="#93c5fd" xml:space="preserve">[*] Receiving bao cao test.bin ... 93%</text>
+<text x="16" y="257" fill="#93c5fd" xml:space="preserve">[*] Received bao cao test.bin (3.0 MB) from TestA - saved in downloads/</text>
+</g>
+</svg>

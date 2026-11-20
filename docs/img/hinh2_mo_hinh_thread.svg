@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 590" width="900" role="img" aria-label="Mô hình thread của chương trình">
+<defs>
+  <style>
+    text{font-family:"Segoe UI",Arial,sans-serif;font-size:13.5px;fill:#1f2937}
+    .t{font-weight:700;font-size:14.5px}
+    .h{font-weight:700;font-size:13px;fill:#6b7280}
+    .c{font-size:11.5px;fill:#14532d}
+    .m{font-size:11.5px;fill:#4c1d95}
+    .n{font-size:12px;fill:#6b7280}
+  </style>
+</defs>
+<rect width="900" height="590" fill="#ffffff"/>
+<text x="30" y="28" class="h">THREAD</text>
+<text x="235" y="28" class="h">ĐANG CHỜ</text>
+<text x="450" y="28" class="h">VIỆC LÀM</text>
+<text x="752" y="28" class="h">KHÓA DÙNG</text>
+<line x1="20" y1="38" x2="880" y2="38" stroke="#d1d5db"/>
+
+<!-- row template: y = 48 + i*72 -->
+<rect x="20" y="48" width="195" height="60" rx="8" fill="#ede9fe" stroke="#7c3aed"/>
+<text x="32" y="72" class="t">Main</text><text x="32" y="92" class="n">1 thread</text>
+<text x="235" y="82">bàn phím (từng phím)</text>
+<text x="450" y="76">đọc phím, chạy lệnh,</text><text x="450" y="94">gửi tin chat</text>
+<rect x="745" y="60" width="104" height="20" rx="10" fill="#dcfce7" stroke="#16a34a"/><text x="797" y="74" text-anchor="middle" class="c">khóa dữ liệu</text>
+<rect x="745" y="84" width="104" height="20" rx="10" fill="#ede9fe" stroke="#7c3aed"/><text x="797" y="98" text-anchor="middle" class="m">khóa màn hình</text>
+
+<rect x="20" y="120" width="195" height="60" rx="8" fill="#fff4de" stroke="#d97706"/>
+<text x="32" y="144" class="t">udp-broadcaster</text><text x="32" y="164" class="n">1 thread</text>
+<text x="235" y="154">đồng hồ 3 giây</text>
+<text x="450" y="148">gửi gói HELLO tới địa chỉ</text><text x="450" y="166">broadcast, cổng 9999</text>
+<rect x="745" y="132" width="104" height="20" rx="10" fill="#dcfce7" stroke="#16a34a"/><text x="797" y="146" text-anchor="middle" class="c">khóa dữ liệu</text>
+<rect x="745" y="156" width="104" height="20" rx="10" fill="#ede9fe" stroke="#7c3aed"/><text x="797" y="170" text-anchor="middle" class="m">khóa màn hình</text>
+
+<rect x="20" y="192" width="195" height="60" rx="8" fill="#fff4de" stroke="#d97706"/>
+<text x="32" y="216" class="t">udp-listener</text><text x="32" y="236" class="n">1 thread</text>
+<text x="235" y="226">gói UDP (tối đa 1 giây)</text>
+<text x="450" y="214">cập nhật người online, dọn người</text><text x="450" y="232">im quá 10 giây, báo vào/ra</text>
+<rect x="745" y="204" width="104" height="20" rx="10" fill="#dcfce7" stroke="#16a34a"/><text x="797" y="218" text-anchor="middle" class="c">khóa dữ liệu</text>
+<rect x="745" y="228" width="104" height="20" rx="10" fill="#ede9fe" stroke="#7c3aed"/><text x="797" y="242" text-anchor="middle" class="m">khóa màn hình</text>
+
+<rect x="20" y="264" width="195" height="60" rx="8" fill="#e3eeff" stroke="#2563eb"/>
+<text x="32" y="288" class="t">tcp-acceptor</text><text x="32" y="308" class="n">1 thread</text>
+<text x="235" y="298">accept(): kết nối TCP mới</text>
+<text x="450" y="292">mỗi kết nối mới tạo một</text><text x="450" y="310">thread tcp-receiver</text>
+<text x="745" y="298" class="n">không dùng khóa</text>
+
+<rect x="20" y="336" width="195" height="60" rx="8" fill="#e3eeff" stroke="#2563eb"/>
+<text x="32" y="360" class="t">tcp-receiver</text><text x="32" y="380" class="n">1 thread / kết nối đến</text>
+<text x="235" y="364">frame HI của kết nối mới</text>
+<text x="450" y="358">phân loại chat / file; chat: lưu</text><text x="450" y="376">kết nối rồi nhận tin; file: nhận file</text>
+<rect x="745" y="348" width="104" height="20" rx="10" fill="#dcfce7" stroke="#16a34a"/><text x="797" y="362" text-anchor="middle" class="c">khóa dữ liệu</text>
+<rect x="745" y="372" width="104" height="20" rx="10" fill="#ede9fe" stroke="#7c3aed"/><text x="797" y="386" text-anchor="middle" class="m">khóa màn hình</text>
+
+<rect x="20" y="408" width="195" height="60" rx="8" fill="#e3eeff" stroke="#2563eb"/>
+<text x="32" y="432" class="t">chat-receiver</text><text x="32" y="452" class="n">1 thread / kết nối mình mở</text>
+<text x="235" y="442">recv() trên socket của một peer</text>
+<text x="450" y="436">hiện tin (hoặc đếm chưa đọc),</text><text x="450" y="454">dọn dẹp khi kết nối đóng</text>
+<rect x="745" y="420" width="104" height="20" rx="10" fill="#dcfce7" stroke="#16a34a"/><text x="797" y="434" text-anchor="middle" class="c">khóa dữ liệu</text>
+<rect x="745" y="444" width="104" height="20" rx="10" fill="#ede9fe" stroke="#7c3aed"/><text x="797" y="458" text-anchor="middle" class="m">khóa màn hình</text>
+
+<rect x="20" y="480" width="195" height="60" rx="8" fill="#dcf5ee" stroke="#0d9488"/>
+<text x="32" y="504" class="t">file-sender</text><text x="32" y="524" class="n">1 thread / lần gửi file</text>
+<text x="235" y="514">đọc đĩa · gửi qua TCP</text>
+<text x="450" y="508">gửi từng khối 64 KB trên kết nối</text><text x="450" y="526">riêng, báo tiến độ mỗi 10%</text>
+<rect x="745" y="492" width="104" height="20" rx="10" fill="#dcfce7" stroke="#16a34a"/><text x="797" y="506" text-anchor="middle" class="c">khóa dữ liệu</text>
+<rect x="745" y="516" width="104" height="20" rx="10" fill="#ede9fe" stroke="#7c3aed"/><text x="797" y="530" text-anchor="middle" class="m">khóa màn hình</text>
+
+<text x="20" y="568" class="n">Khóa dữ liệu nằm trong state.py, khóa màn hình nằm trong ui.py. Hai khóa không bao giờ bị giữ cùng lúc nên không thể xảy ra deadlock.</text>
+</svg>

@@ -1,0 +1,29 @@
+MINH CHUNG: man hinh cua TestB trong test dau-cuoi (tests/test_end_to_end.py)
+
+[*] Checking that the name 'TestB' is free (3.5 s) ...
+[*] Listening on TCP port 55688
+[*] Broadcasting presence on UDP port 9999 (to 127.255.255.255)
+[*] Type /help for the list of commands
+[*] TestC is online
+[*] TestA is online
+[*] New message from TestA (1 unread)
+[*] Switched to TestA
+[*] 1 unread:
+[TestA] xin chào | ok
+[TestB] ok nhé
+[*] TestA is now away
+[TestA] chat during transfer
+[*] Receiving bao cao test.bin (3.0 MB) from TestA ...
+[*] Receiving bao cao test.bin ... 10%
+[*] Receiving bao cao test.bin ... 20%
+[*] Receiving bao cao test.bin ... 31%
+[*] Receiving bao cao test.bin ... 41%
+[*] Receiving bao cao test.bin ... 52%
+[*] Receiving bao cao test.bin ... 62%
+[*] Receiving bao cao test.bin ... 72%
+[*] Receiving bao cao test.bin ... 83%
+[*] Receiving bao cao test.bin ... 93%
+[*] Received bao cao test.bin (3.0 MB) from TestA - saved in downloads/
+[*] Left the chat with TestA.
+[*] TestC went offline
+[*] Bye!

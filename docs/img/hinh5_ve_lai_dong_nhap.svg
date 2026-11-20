@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" role="img" aria-label="Ba bước vẽ lại dòng nhập khi có tin nhắn đến lúc đang gõ dở">
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/></marker>
+  <style>
+    text{font-family:"Segoe UI",Arial,sans-serif;font-size:13.5px;fill:#1f2937}
+    .h{font-weight:700;font-size:14px}
+    .m{font-family:Consolas,"Courier New",monospace;font-size:13px;fill:#e5e7eb}
+    .g{font-family:Consolas,"Courier New",monospace;font-size:13px;fill:#86efac}
+    .y{font-family:Consolas,"Courier New",monospace;font-size:13px;fill:#fde68a}
+    .d{font-family:Consolas,"Courier New",monospace;font-size:12px;fill:#6b7280}
+    .s{font-size:12.5px;fill:#374151}
+    .l{stroke:#4b5563;stroke-width:1.8;fill:none;marker-end:url(#a)}
+  </style>
+</defs>
+<rect width="900" height="330" fill="#ffffff"/>
+
+<text x="115" y="26" text-anchor="middle" class="h">0. Đang gõ dở</text>
+<text x="338" y="26" text-anchor="middle" class="h">1. Xóa dòng nhập</text>
+<text x="561" y="26" text-anchor="middle" class="h">2. In tin nhắn</text>
+<text x="784" y="26" text-anchor="middle" class="h">3. Vẽ lại dấu nhắc + chữ dở</text>
+
+<rect x="12" y="40" width="206" height="150" rx="8" fill="#111827"/>
+<text x="24" y="66" class="m">[Quan] it's not enough</text>
+<text x="24" y="130" class="y">&gt; you can che_</text>
+
+<rect x="235" y="40" width="206" height="150" rx="8" fill="#111827"/>
+<text x="247" y="66" class="m">[Quan] it's not enough</text>
+<text x="247" y="130" class="d">(dòng nhập đã bị xóa)</text>
+
+<rect x="458" y="40" width="206" height="150" rx="8" fill="#111827"/>
+<text x="470" y="66" class="m">[Quan] it's not enough</text>
+<text x="470" y="90" class="g">[Minh] ok, which part?</text>
+<text x="470" y="130" class="d">(con trỏ xuống dòng mới)</text>
+
+<rect x="681" y="40" width="206" height="150" rx="8" fill="#111827"/>
+<text x="693" y="66" class="m">[Quan] it's not enough</text>
+<text x="693" y="90" class="g">[Minh] ok, which part?</text>
+<text x="693" y="130" class="y">&gt; you can che_</text>
+
+<path class="l" d="M220,115 L233,115"/>
+<path class="l" d="M443,115 L456,115"/>
+<path class="l" d="M666,115 L679,115"/>
+
+<text x="12" y="216" class="s">Bước 1: về đầu dòng rồi xóa tới cuối dòng (hai mã điều khiển của terminal).</text>
+<text x="12" y="236" class="s">Bước 2: in tin nhắn rồi xuống dòng.   Bước 3: in lại dấu nhắc "&gt; " cùng chữ đang gõ dở.</text>
+<text x="12" y="266" class="s">Chữ đang gõ luôn được nhớ trong một bộ đệm riêng nên không bao giờ bị mất; người dùng gõ tiếp như chưa có chuyện gì.</text>
+<text x="12" y="286" class="s">Một khóa màn hình bảo đảm hai thread không bao giờ in cùng lúc (nếu không, chữ của hai thread sẽ xen vào nhau).</text>
+<text x="12" y="316" class="s">Ảnh thật của kết quả này (đọc từ màn hình console Windows thật): xem Hình 6.</text>
+</svg>

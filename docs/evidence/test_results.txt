@@ -1,0 +1,74 @@
+MINH CHUNG: ket qua chay toan bo bo test (python -m unittest discover -s tests -t . -v)
+Ngay chay: 2026-11-20 20:41  |  Python 3.11.9  |  Windows 11
+
+test_bad_packets_return_none (tests.test_discovery.HelloTest.test_bad_packets_return_none) ... ok
+test_build_then_parse (tests.test_discovery.HelloTest.test_build_then_parse) ... ok
+test_vietnamese_name (tests.test_discovery.HelloTest.test_vietnamese_name) ... ok
+test_empty_list_message (tests.test_discovery.PeerListTest.test_empty_list_message) ... ok
+test_find_by_number_or_name (tests.test_discovery.PeerListTest.test_find_by_number_or_name) ... ok
+test_list_format_matches_the_assignment_example (tests.test_discovery.PeerListTest.test_list_format_matches_the_assignment_example) ... ok
+test_list_shows_unread_and_partner (tests.test_discovery.PeerListTest.test_list_shows_unread_and_partner) ... ok
+test_duplicate_name_is_refused (tests.test_end_to_end.EndToEndTest.test_duplicate_name_is_refused) ... ok
+test_full_scenario (tests.test_end_to_end.EndToEndTest.test_full_scenario) ... ok
+test_same_tcp_port_is_refused (tests.test_end_to_end.EndToEndTest.test_same_tcp_port_is_refused)
+Trên Windows, nếu chỉ dùng SO_REUSEADDR thì chương trình thứ hai sẽ cùng nghe một cổng mà không báo lỗi. ... ok
+test_delete_ignores_missing_file (tests.test_filetransfer.OpenDownloadTest.test_delete_ignores_missing_file) ... ok
+test_file_cannot_escape_download_folder (tests.test_filetransfer.OpenDownloadTest.test_file_cannot_escape_download_folder) ... ok
+test_same_name_gets_a_number_instead_of_overwriting (tests.test_filetransfer.OpenDownloadTest.test_same_name_gets_a_number_instead_of_overwriting) ... ok
+test_format_size (tests.test_filetransfer.ProgressTest.test_format_size) ... ok
+test_percent (tests.test_filetransfer.ProgressTest.test_percent) ... ok
+test_report_every_ten_percent (tests.test_filetransfer.ProgressTest.test_report_every_ten_percent) ... ok
+test_complete_file_is_saved (tests.test_filetransfer.ReceiveFileTest.test_complete_file_is_saved) ... ok
+test_interrupted_file_is_deleted (tests.test_filetransfer.ReceiveFileTest.test_interrupted_file_is_deleted) ... ok
+test_zero_byte_file (tests.test_filetransfer.ReceiveFileTest.test_zero_byte_file) ... ok
+test_bad_characters_and_empty_names (tests.test_filetransfer.SafeFilenameTest.test_bad_characters_and_empty_names) ... ok
+test_long_name_keeps_extension (tests.test_filetransfer.SafeFilenameTest.test_long_name_keeps_extension) ... ok
+test_path_tricks_are_removed (tests.test_filetransfer.SafeFilenameTest.test_path_tricks_are_removed) ... ok
+test_vietnamese_name_is_kept (tests.test_filetransfer.SafeFilenameTest.test_vietnamese_name_is_kept) ... ok
+test_send_missing_file_reports_not_found (tests.test_filetransfer.SendFileChecksTest.test_send_missing_file_reports_not_found) ... ok
+test_send_without_open_chat_reminds_the_user (tests.test_filetransfer.SendFileChecksTest.test_send_without_open_chat_reminds_the_user) ... ok
+test_every_code_file_starts_with_a_docstring (tests.test_project_rules.ProjectRulesTest.test_every_code_file_starts_with_a_docstring) ... ok
+test_imports_follow_the_dependency_direction (tests.test_project_rules.ProjectRulesTest.test_imports_follow_the_dependency_direction) ... ok
+test_no_file_over_300_lines (tests.test_project_rules.ProjectRulesTest.test_no_file_over_300_lines) ... ok
+test_only_the_eight_program_files_at_root (tests.test_project_rules.ProjectRulesTest.test_only_the_eight_program_files_at_root) ... ok
+test_report_has_no_code_and_its_images_exist (tests.test_project_rules.ProjectRulesTest.test_report_has_no_code_and_its_images_exist) ... ok
+test_file_header_leaves_file_bytes_unread (tests.test_protocol.ProtocolTest.test_file_header_leaves_file_bytes_unread) ... ok
+test_garbage_raises_valueerror (tests.test_protocol.ProtocolTest.test_garbage_raises_valueerror) ... ok
+test_hi_and_bye (tests.test_protocol.ProtocolTest.test_hi_and_bye) ... ok
+test_message_too_long_is_rejected (tests.test_protocol.ProtocolTest.test_message_too_long_is_rejected) ... ok
+test_msg_length_counts_bytes_not_characters (tests.test_protocol.ProtocolTest.test_msg_length_counts_bytes_not_characters)
+Bẫy #1: "Việt" là 4 ký tự nhưng 6 byte. Header phải ghi 6. ... ok
+test_msg_roundtrip_ascii (tests.test_protocol.ProtocolTest.test_msg_roundtrip_ascii) ... ok
+test_msg_roundtrip_vietnamese_pipe_and_empty (tests.test_protocol.ProtocolTest.test_msg_roundtrip_vietnamese_pipe_and_empty) ... ok
+test_peer_closed_raises_connectionerror (tests.test_protocol.ProtocolTest.test_peer_closed_raises_connectionerror) ... ok
+test_pipe_in_filename_is_replaced (tests.test_protocol.ProtocolTest.test_pipe_in_filename_is_replaced) ... ok
+test_recv_exact_raises_when_peer_closes (tests.test_protocol.ProtocolTest.test_recv_exact_raises_when_peer_closes)
+Gửi 3 byte rồi đóng; recv_exact(10) phải ném ConnectionError (không treo, không trả thiếu). ... ok
+test_recv_exact_waits_for_all_bytes (tests.test_protocol.ProtocolTest.test_recv_exact_waits_for_all_bytes)
+Gửi 10 byte làm 2 lần (5 + 5) cách nhau một chút; recv_exact phải trả về đủ 10 byte. ... ok
+test_two_messages_back_to_back (tests.test_protocol.ProtocolTest.test_two_messages_back_to_back)
+Gửi 2 tin liền nhau rồi mới đọc: read_frame phải tách đúng từng tin (bằng chứng framing hoạt động). ... ok
+test_many_threads_counting_unread_do_not_lose_updates (tests.test_state.ChatsTest.test_many_threads_counting_unread_do_not_lose_updates) ... ok
+test_new_connection_replaces_old_and_old_cleanup_is_silent (tests.test_state.ChatsTest.test_new_connection_replaces_old_and_old_cleanup_is_silent) ... ok
+test_pop_all_connections_empties_everything (tests.test_state.ChatsTest.test_pop_all_connections_empties_everything) ... ok
+test_remove_connection_resets_partner (tests.test_state.ChatsTest.test_remove_connection_resets_partner) ... ok
+test_unread_counts_only_for_non_partner (tests.test_state.ChatsTest.test_unread_counts_only_for_non_partner) ... ok
+test_identity (tests.test_state.MyInfoTest.test_identity) ... ok
+test_status_validation (tests.test_state.MyInfoTest.test_status_validation) ... ok
+test_expired_peers_are_removed (tests.test_state.PeersTest.test_expired_peers_are_removed) ... ok
+test_returned_copies_do_not_change_the_store (tests.test_state.PeersTest.test_returned_copies_do_not_change_the_store) ... ok
+test_sorted_by_name (tests.test_state.PeersTest.test_sorted_by_name) ... ok
+test_update_reports_new_status_same (tests.test_state.PeersTest.test_update_reports_new_status_same) ... ok
+test_backspace_special_keys_and_vietnamese (tests.test_ui.InputLoopTest.test_backspace_special_keys_and_vietnamese) ... ok
+test_enter_sends_line_and_quit_stops (tests.test_ui.InputLoopTest.test_enter_sends_line_and_quit_stops) ... ok
+test_typed_text_survives_incoming_message_between_keys (tests.test_ui.InputLoopTest.test_typed_text_survives_incoming_message_between_keys) ... ok
+test_plain_mode_reads_lines_and_prints_without_ansi (tests.test_ui.PlainModeTest.test_plain_mode_reads_lines_and_prints_without_ansi) ... ok
+test_backspace_and_take_line (tests.test_ui.ShowMessageTest.test_backspace_and_take_line) ... ok
+test_many_threads_printing_do_not_interleave_lines (tests.test_ui.ShowMessageTest.test_many_threads_printing_do_not_interleave_lines) ... ok
+test_message_goes_above_input_and_typed_text_is_redrawn (tests.test_ui.ShowMessageTest.test_message_goes_above_input_and_typed_text_is_redrawn) ... ok
+test_bytes_on_the_wire (tests.test_wire_format.WireFormatTest.test_bytes_on_the_wire) ... ok
+
+----------------------------------------------------------------------
+Ran 61 tests in 25.631s
+
+OK

@@ -1,147 +1,240 @@
 """
 tcp_chat.py - Chat qua TCP: nhận kết nối, nhận tin, mở/đóng chat, gửi tin.
 
-Người phụ trách: HUY          Người review (teach-back): PHONG
+Người phụ trách giải thích khi vấn đáp: HUY          Người review (teach-back): PHONG
 Điểm rubric liên quan: TCP chat (20% - điểm cao nhất), Error handling (10%)
-Đọc trước: đề mục 3.3, 5.1, 5.3; protocol.py (viết xong trước file này)
+Đọc trước: đề mục 3.3, 5.1, 5.3; protocol.py. ĐỌC TIẾP: filetransfer.py (nơi nhận file khi kết nối là kiểu "file").
 
-----------------------------------------------------------------------------------------
-BỨC TRANH CHUNG
-  * TCP acceptor thread : accept() chờ kết nối mới; mỗi kết nối -> tạo 1 RECEIVER thread riêng
-                          (đây chính là "TCP receiver (one per connection)" trong cập nhật 09/11 của đề).
-  * Receiver thread     : vòng lặp read_frame() cho 1 kết nối: MSG -> hiện/lưu; BYE hoặc lỗi -> dọn dẹp.
-  * Main thread         : /chat, /leave, gửi tin (send_text) - gọi từ lanchat.py.
+BỨC TRANH CHUNG (đề mục 5.1: mỗi kết nối TCP có thread nhận riêng, "TCP receiver one per connection")
+  Thread acceptor : CHỜ accept(). Mỗi kết nối mới -> tạo MỘT thread riêng chạy handle_connection.
+                    Vì sao? recv() chặn: dùng chung một thread thì người này đang chờ sẽ làm kẹt người kia.
+  Thread nhận tin : CHỜ recv() của MỘT kết nối chat: hiện tin, đếm unread, dọn dẹp khi đóng.
+  Main thread     : /chat, /leave, gửi tin (open_chat, send_text, leave_chat) - gọi từ lanchat.py.
+  Chỉ MAIN thread gửi trên socket chat, nên hai thread không bao giờ cùng sendall một socket (byte hai frame
+  không bị trộn). Gửi file dùng kết nối riêng (filetransfer.py).
 
-MỖI KẾT NỐI TCP BẮT ĐẦU BẰNG frame HI|<name>|
-  Vì accept() chỉ cho biết (IP, cổng tạm), KHÔNG cho biết tên người gọi, và trên 1 máy mọi peer cùng IP.
+MỖI KẾT NỐI BẮT ĐẦU BẰNG  HI|<name>|<kind>|  (accept() chỉ thấy (IP, cổng tạm), không biết tên người gọi
+  và không biết họ muốn chat hay gửi file):  kind = "chat" -> lưu kết nối, nhận tin;  kind = "file" -> nhận file.
 
-MỘT KẾT NỐI CHAT CHO MỖI CẶP NGƯỜI
-  A /chat B => A connect tới B. B thấy kết nối đến (accept) và lưu vào state.connections["A"].
-  Khi B gõ /chat A thì DÙNG LẠI kết nối đó (đừng mở thêm). Kết nối hai chiều: cả hai bên đều gửi/nhận
-  trên cùng socket, nên CẢ bên connect lẫn bên accept đều phải có receiver thread.
+MỘT KẾT NỐI CHAT CHO MỖI CẶP NGƯỜI: A /chat B => A connect tới B; B accept và lưu kết nối đó. Khi B gõ /chat A thì
+  DÙNG LẠI kết nối ấy (kết nối đi hai chiều; cả hai bên đều có thread nhận tin). Chuyển sang người khác KHÔNG
+  đóng kết nối cũ: tin của người đó vẫn tới ngầm và được đếm "unread".
 
-TIN CỦA NGƯỜI KHÔNG PHẢI PARTNER HIỆN TẠI (đề mục 3.3)
-  Lưu vào state.history + tăng state.unread, in "[*] New message from Huy (1 unread)".
-  Khi /chat người đó -> in lại các tin đã lưu rồi reset unread về 0.
+TIN CỦA NGƯỜI KHÔNG PHẢI PARTNER (đề mục 3.3): lưu lại + in "[*] New message from Huy (1 unread)";
+  khi /chat người đó thì in lại các tin chưa đọc.
 
 CÁC BẪY
-  1. Không bao giờ gọi ui.show_message khi đang giữ state.data_lock (xem state.py).
-  2. recv trả b"" / ConnectionError / ConnectionResetError -> peer thoát hoặc crash: báo
-     "[*] Minh disconnected", xóa khỏi state.connections, đóng socket, KHÔNG để thread chết im lặng.
-  3. Hai thread cùng sendall trên một socket sẽ trộn byte -> file KHÔNG gửi trên kết nối chat
-     (filetransfer.py mở kết nối riêng).
-  4. Server socket: setsockopt SO_REUSEADDR để chạy lại ngay cùng cổng không bị "Address already in use".
-  5. connect tới người vừa offline: dùng timeout (config.CONNECT_TIMEOUT), bắt OSError, báo lỗi, không crash.
-----------------------------------------------------------------------------------------
+  1. recv trả b"" / ConnectionError: peer thoát hoặc crash -> báo "disconnected", dọn kết nối, KHÔNG để thread chết im lặng.
+  2. Windows: SO_REUSEADDR cho phép HAI chương trình cùng nghe một cổng TCP (kết nối đi lạc!). Dùng
+     SO_EXCLUSIVEADDRUSE để cổng bận thì báo lỗi rõ ràng. Linux/macOS thì dùng SO_REUSEADDR để chạy lại ngay.
+  3. /leave gỡ kết nối khỏi danh sách TRƯỚC khi đóng socket -> thread nhận tin thấy "không còn là kết nối đang
+     được lưu" nên im lặng, không báo "mất kết nối" sai.
+  4. In màn hình (ui.show_message) luôn NGOÀI lock: các hàm state.* đã nhả lock rồi mới trả về.
 """
+import os
 import socket
 import threading
 
 import config
-import discovery
 import filetransfer
 import protocol
 import state
 import ui
 
 
+# ======================================================================== phía NHẬN
 def start_acceptor(port):
-    """Tạo server socket, bắt đầu nghe, chạy _accept_loop trong một thread daemon.
-
-    Việc cần làm: socket TCP -> SO_REUSEADDR -> bind(("", port)) -> listen() -> Thread(daemon=True).start().
-    Nếu bind lỗi (cổng bận) -> báo rõ "cổng X đang được dùng, hãy chạy với --port khác" rồi thoát gọn.
-    Trả về server socket (để lúc /quit đóng nó lại).
-    """
-    raise NotImplementedError("TODO: start_acceptor")
-
-
-def _accept_loop(server_sock):
-    """Thread acceptor: lặp accept() -> với mỗi (conn, addr) tạo thread chạy handle_connection.
-
-    Dừng khi server_sock bị đóng (accept sẽ ném OSError) hoặc state.stop_event set.
-    Vì sao mỗi kết nối cần một thread riêng? (recv chặn: nếu dùng chung một thread thì người này
-    đang chờ sẽ làm kẹt người kia.)
-    """
-    raise NotImplementedError("TODO: _accept_loop")
-
-
-def handle_connection(conn, addr, known_name=None):
-    """Receiver thread của MỘT kết nối. Chạy cho tới khi kết nối đóng.
-
-    known_name = None  -> kết nối do người khác gọi tới: frame đầu PHẢI là HI, lấy tên từ đó.
-    known_name = "Minh" -> kết nối mình tự connect đi (connect_to): đã biết tên, không cần đợi HI.
-
-    Việc cần làm:
-      1. (nếu chưa biết tên) read_frame -> phải là ("HI", name), nếu không thì đóng + bỏ.
-      2. Đăng ký state.connections[name] = conn (trong lock). Đã có kết nối cũ với tên này thì xử lý ra sao?
-         (nhóm quyết: giữ kết nối cũ & đóng kết nối mới? ghi vào docs/PROTOCOL.md)
-      3. Vòng lặp read_frame:
-           ("MSG", text)  -> _on_message(name, text)
-           ("BYE",)       -> thoát vòng lặp
-           ("FILE", filename, size) -> đây là KẾT NỐI GỬI FILE: gọi filetransfer.receive_file(...)
-                                       rồi kết thúc (kết nối file chỉ chở một file).
-      4. Bắt ConnectionError/OSError/ValueError -> thoát vòng lặp (peer crash hoặc dữ liệu hỏng).
-      5. finally: dọn dẹp (xóa khỏi connections nếu đúng là kết nối này, đóng conn, báo disconnected
-         nếu đó là partner hiện tại thì current_partner = None).
-    """
-    raise NotImplementedError("TODO: handle_connection")
+    """Mở cổng TCP `port`, bắt đầu chờ kết nối ở một thread daemon. Trả về server socket (để /quit đóng lại).
+    Cổng đang bận -> ném OSError (lanchat.py báo "hãy dùng --port khác")."""
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if os.name == "nt":
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)   # xem BẪY #2
+    else:
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        server.bind(("", port))              # "" = nhận kết nối từ mọi card mạng
+        server.listen()
+    except OSError:
+        server.close()
+        raise
+    server.settimeout(1.0)                   # để vòng accept thỉnh thoảng nhìn cờ dừng
+    threading.Thread(target=_accept_loop, args=(server,), daemon=True, name="tcp-acceptor").start()
+    return server
 
 
-def _on_message(name, text):
-    """Xử lý một tin vừa nhận từ `name`.
+def _accept_loop(server):
+    """Thread acceptor: lặp accept(); mỗi kết nối mới chạy handle_connection ở một thread riêng."""
+    while not state.is_stopped():
+        try:
+            conn, addr = server.accept()
+        except socket.timeout:
+            continue
+        except OSError:
+            return                           # server socket đã bị đóng (/quit)
+        threading.Thread(target=handle_connection, args=(conn, addr), daemon=True, name="tcp-receiver").start()
 
-    - Ghi vào state.history[name].
-    - Nếu name == state.current_partner: ui.show_message(f"[{name}] {text}")
-    - Ngược lại: state.unread[name] += 1 rồi ui.show_message(f"[*] New message from {name} ({n} unread)")
-    Nhớ: sửa dữ liệu TRONG lock, in màn hình NGOÀI lock. Bạn phải tự quyết thứ tự các bước cho đúng.
-    """
-    raise NotImplementedError("TODO: _on_message")
+
+def handle_connection(conn, addr):
+    """Thread của MỘT kết nối đến. Đọc frame HI để biết đây là kết nối chat hay file:
+         kind "chat" -> lưu vào state, chạy vòng nhận tin tới khi kết nối đóng
+         kind "file" -> đọc frame FILE rồi nhận file (kết nối file chỉ chở MỘT file)
+    Chống treo: kết nối mới phải gửi xong HI trong 5 giây, không thì bị đóng (đề phòng kết nối rác)."""
+    try:
+        conn.settimeout(config.HANDSHAKE_TIMEOUT)
+        frame = protocol.read_frame(conn)
+        if frame[0] != "HI":
+            raise ValueError("the first frame must be HI")
+        _, name, kind = frame
+
+        if kind == protocol.KIND_FILE:
+            frame = protocol.read_frame(conn)
+            if frame[0] != "FILE":
+                raise ValueError("a file connection must send a FILE frame after HI")
+            conn.settimeout(config.FILE_STALL_TIMEOUT)   # nhận file: 30 s không có byte nào thì coi là đứt
+            filetransfer.receive_file(conn, name, frame[1], frame[2])
+            protocol.close_quietly(conn)
+        else:
+            conn.settimeout(None)                        # chat: chờ tin vô thời hạn
+            old_conn = state.add_connection(name, conn)
+            if old_conn is not None:                     # kết nối chat cũ với người này (có thể đã chết) -> đóng
+                protocol.close_quietly(old_conn)
+            _receive_loop(conn, name)
+    except (OSError, ValueError):
+        protocol.close_quietly(conn)                     # kết nối rác hoặc đứt giữa chừng: bỏ, không crash
 
 
+def _receive_loop(sock, name):
+    """Nhận tin từ `name` trên `sock` cho tới khi kết nối đóng. Cả bên connect lẫn bên accept đều chạy hàm này."""
+    reason = "left the chat"
+    try:
+        while True:
+            frame = protocol.read_frame(sock)
+            if frame[0] == "MSG":
+                _show_incoming(name, frame[1])
+            elif frame[0] == "BYE":
+                break                                    # đối phương chủ động rời chat
+            else:
+                raise ValueError(f"unexpected {frame[0]} frame on a chat connection")
+    except ConnectionError:
+        reason = "disconnected (connection lost)"        # đối phương tắt đột ngột / mất mạng
+    except (OSError, ValueError) as error:
+        reason = f"disconnected ({error})"               # lỗi khác hoặc dữ liệu hỏng
+    finally:
+        _cleanup(sock, name, reason)
+
+
+def _show_incoming(name, text):
+    """Một tin vừa đến từ `name`: lưu vào lịch sử rồi hiện ngay (nếu là partner) hoặc đếm chưa đọc."""
+    line = f"[{name}] {text}"
+    is_partner, unread = state.record_incoming(name, line)   # sửa dữ liệu TRONG lock (bên trong state)
+    if is_partner:
+        ui.show_message(line)                                # in màn hình NGOÀI lock
+    else:
+        ui.show_message(f"[*] New message from {name} ({unread} unread)")
+
+
+def _cleanup(sock, name, reason):
+    """Dọn dẹp khi kết nối kết thúc. Chỉ báo người dùng nếu kết nối này vẫn là kết nối đang được lưu
+    (đã bị /leave hoặc bị kết nối mới thay thế thì im lặng, tránh báo lặp)."""
+    was_registered, was_partner = state.remove_connection(name, sock)
+    protocol.close_quietly(sock)
+    if was_registered:
+        ui.show_message(f"[*] {name} {reason}." + (" Chat closed." if was_partner else ""))
+
+
+# ======================================================================== phía GỌI ĐI + GỬI
 def connect_to(name):
-    """Mở kết nối TCP tới peer `name`. Trả về socket, hoặc None nếu thất bại (đã in lỗi).
-
-    Việc cần làm:
-      1. Lấy ip + tcp_port của peer từ state.peers (trong lock, rồi ra khỏi lock). Không có -> báo lỗi.
-      2. socket.create_connection((ip, port), timeout=config.CONNECT_TIMEOUT) trong try/except OSError.
-      3. Sau khi connect: bỏ timeout (sock.settimeout(None)) vì receiver cần chờ vô hạn. Vì sao?
-      4. protocol.send_hi(sock, state.my_name).
-      5. Tạo thread chạy handle_connection(sock, addr, known_name=name).
-    """
-    raise NotImplementedError("TODO: connect_to")
+    """Mở kết nối chat tới `name`: connect -> gửi HI -> lưu -> bật thread nhận tin.
+    Trả về socket, hoặc None nếu thất bại (đã báo lỗi; ví dụ người đó vừa offline: timeout 3 s, không crash)."""
+    peer = state.get_peer(name)
+    if peer is None:
+        ui.show_message(f"[!] Cannot connect to {name}: not online")
+        return None
+    try:
+        sock = protocol.connect_and_introduce(peer["ip"], peer["tcp_port"], state.get_name(), protocol.KIND_CHAT)
+    except OSError as error:
+        ui.show_message(f"[!] Cannot connect to {name}: {error}")
+        return None
+    old_sock = state.add_connection(name, sock)
+    if old_sock is not None:
+        protocol.close_quietly(old_sock)
+    threading.Thread(target=_receive_loop, args=(sock, name), daemon=True, name="chat-receiver").start()
+    return sock
 
 
 def open_chat(name):
-    """Thực hiện /chat <name>: dùng lại kết nối có sẵn hoặc connect_to(name); đặt state.current_partner.
+    """/chat: dùng lại kết nối có sẵn hoặc mở mới, đặt `name` làm partner, in lại tin chưa đọc."""
+    if state.get_connection(name) is None:
+        if connect_to(name) is None:
+            return False                                     # connect_to đã báo lỗi
+        peer = state.get_peer(name)
+        address = f" ({peer['ip']}:{peer['tcp_port']})" if peer else ""
+        header = f"[*] Connected to {name}{address}"
+    else:
+        header = f"[*] Switched to {name}"
+    state.set_partner(name)
+    ui.show_lines([header] + _lines_to_replay(name))
+    return True
 
-    Sau khi mở: in "[*] Connected to Minh (192.168.1.12:6000)", in lại các tin chưa đọc trong
-    state.history[name], đặt state.unread[name] = 0.
-    Trả về True/False cho caller biết có mở được không.
-    Tình huống cần xử lý: /chat chính mình; đang chat với người khác (chuyển partner có đóng kết nối cũ không? gợi ý: KHÔNG,
-    chỉ đổi current_partner - để vẫn nhận tin nền và đếm unread).
-    """
-    raise NotImplementedError("TODO: open_chat")
+
+def _lines_to_replay(name):
+    """Các dòng in lại khi mở chat: tin chưa đọc, hoặc vài tin gần nhất nếu không có tin chưa đọc."""
+    unread = state.take_unread(name)                         # lấy số chưa đọc và đặt lại về 0
+    if unread > 0:
+        return [f"[*] {unread} unread:"] + state.history_tail(name, unread)
+    recent = state.history_tail(name, config.HISTORY_REPLAY_LINES)
+    return ["[*] Recent messages:"] + recent if recent else []
 
 
 def send_text(text):
-    """Gửi một tin cho partner hiện tại. Chưa mở chat thì báo "[*] Hãy /chat <tên> trước".
-
-    Gợi ý: lấy socket từ state.connections (trong lock) -> protocol.send_msg(sock, text) NGOÀI lock
-    (gửi qua mạng có thể chậm, đừng giữ lock lúc đó). Lỗi gửi (OSError) -> báo + dọn kết nối.
-    Hiển thị dòng "[Tên_mình] text" cho chính mình + ghi history.
-    """
-    raise NotImplementedError("TODO: send_text")
+    """Gửi `text` cho partner hiện tại và hiện dòng "[Tên_mình] text". Chưa /chat ai thì nhắc."""
+    name = state.get_partner()
+    if name is None:
+        ui.show_message("[*] No chat open. Use /chat <name|number> first (see /list).")
+        return
+    if len(text.encode(config.ENCODING)) > config.MAX_MSG_BYTES:
+        ui.show_message("[!] Message too long.")
+        return
+    sock = state.get_connection(name)
+    if sock is None:                                         # kết nối đã mất mà partner chưa kịp reset
+        state.set_partner(None)
+        ui.show_message(f"[!] Connection with {name} is closed. Use /chat {name} to reconnect.")
+        return
+    try:
+        protocol.send_msg(sock, text)                        # gửi qua mạng NGOÀI lock (có thể chậm)
+    except OSError as error:
+        state.remove_connection(name, sock)
+        protocol.close_quietly(sock)
+        ui.show_message(f"[!] Could not send to {name}: {error}. Chat closed.")
+        return
+    line = f"[{state.get_name()}] {text}"
+    state.record_outgoing(name, line)
+    ui.show_message(line)
 
 
 def leave_chat():
-    """Thực hiện /leave: gửi BYE, đóng kết nối với partner hiện tại, current_partner = None.
-
-    Hỏi trước khi code: sau /leave người kia còn gửi tin được không? (đóng socket -> không). Ghi lại quyết định.
-    """
-    raise NotImplementedError("TODO: leave_chat")
+    """/leave: gửi BYE, đóng kết nối với partner hiện tại, không còn partner. Người kia thấy "left the chat"."""
+    name = state.get_partner()
+    if name is None:
+        ui.show_message("[*] You are not in a chat.")
+        return
+    sock = state.get_connection(name)
+    if sock is not None:
+        state.remove_connection(name, sock)   # gỡ khỏi danh sách TRƯỚC (xem BẪY #3)
+        _say_goodbye(sock)
+    state.set_partner(None)
+    ui.show_message(f"[*] Left the chat with {name}.")
 
 
 def close_all():
-    """Dùng khi /quit: gửi BYE tới mọi kết nối đang mở, đóng hết socket (bắt lỗi từng cái - một cái hỏng
-    không được làm các cái sau bị bỏ sót)."""
-    raise NotImplementedError("TODO: close_all")
+    """/quit: gửi BYE và đóng mọi kết nối chat. Một kết nối hỏng không được làm các kết nối sau bị bỏ sót."""
+    for _name, sock in state.pop_all_connections():
+        _say_goodbye(sock)
+
+
+def _say_goodbye(sock):
+    try:
+        protocol.send_bye(sock)
+    except OSError:
+        pass                                  # đối phương đã mất rồi: không sao
+    protocol.close_quietly(sock)

@@ -1,0 +1,36 @@
+MINH CHUNG: go phim THAT trong console Windows THAT (tests/manual_console_check.py)
+
+[1] Man hinh luc khoi dong:
+[*] Checking that the name 'Con' is free (3.5 s) ...
+[*] Listening on TCP port 49680
+[*] Broadcasting presence on UDP port 9999 (to 127.255.255.255)
+[*] Type /help for the list of commands
+[*] Peer is online
+>
+
+[2] Tin den luc dang go do 'you can che' (dong cuoi phai la '> you can che'):
+[*] Checking that the name 'Con' is free (3.5 s) ...
+[*] Listening on TCP port 49680
+[*] Broadcasting presence on UDP port 9999 (to 127.255.255.255)
+[*] Type /help for the list of commands
+[*] Peer is online
+[*] Switched to Peer
+[Peer] ok, which part?
+> you can che
+
+[3] Sau 2 lan Backspace, go tiep va bam Enter:
+[*] Checking that the name 'Con' is free (3.5 s) ...
+[*] Listening on TCP port 49680
+[*] Broadcasting presence on UDP port 9999 (to 127.255.255.255)
+[*] Type /help for the list of commands
+[*] Peer is online
+[*] Switched to Peer
+[Peer] ok, which part?
+[Con] you can cck tiếng Việt ế
+>
+
+[4] Peer (instance thu hai) nhan duoc:
+[*] Con is online
+[*] Connected to Con (127.0.0.1:49680)
+[Con] you can cck tiếng Việt ế
+[*] Con left the chat. Chat closed.

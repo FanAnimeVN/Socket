@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 704 392" width="704" role="img" aria-label="Các byte thật trên dây: gói UDP HELLO và các frame TCP"><style>text{font-family:Consolas,"Cascadia Mono","Courier New",monospace;font-size:13.5px;white-space:pre}.bar{font-family:"Segoe UI",Arial,sans-serif;font-size:12px;fill:#9ca3af}</style>
+<g transform="translate(0,0)">
+<rect width="704" height="392" rx="9" fill="#111827"/>
+<rect width="704" height="26" rx="9" fill="#1f2937"/><rect y="14" width="704" height="12" fill="#1f2937"/>
+<circle cx="16" cy="13" r="5" fill="#ef4444"/><circle cx="32" cy="13" r="5" fill="#f59e0b"/><circle cx="48" cy="13" r="5" fill="#22c55e"/>
+<text x="64" y="17" class="bar">Byte THẬT bắt được trên dây (peer giả ghi lại)</text>
+<text x="16" y="48" fill="#86efac" xml:space="preserve">[UDP] datagram captured on port 9999 (from 127.0.0.1:62464)</text>
+<text x="16" y="67" fill="#86efac" xml:space="preserve">   text: b'HELLO|Wire|55748|online'</text>
+<text x="16" y="86" fill="#e5e7eb" xml:space="preserve">   size: 23 bytes</text>
+<text x="16" y="105" fill="#86efac" xml:space="preserve">[TCP #1] first bytes after the 3-way handshake (A -&gt; B)</text>
+<text x="16" y="124" fill="#86efac" xml:space="preserve">   text: b'HI|Wire|chat|'</text>
+<text x="16" y="143" fill="#e5e7eb" xml:space="preserve">   size: 13 bytes</text>
+<text x="16" y="162" fill="#86efac" xml:space="preserve">[TCP #1] chat message 'Xin chào' = 8 characters but 9 bytes (A -&gt; B)</text>
+<text x="16" y="181" fill="#86efac" xml:space="preserve">   text: b'MSG|9|Xin ch\xc3\xa0o'</text>
+<text x="16" y="200" fill="#e5e7eb" xml:space="preserve">   size: 15 bytes</text>
+<text x="16" y="219" fill="#86efac" xml:space="preserve">[TCP #1] reply from the fake peer (B -&gt; A), program shows '[Fake] ok'</text>
+<text x="16" y="238" fill="#86efac" xml:space="preserve">   text: b'MSG|2|ok'</text>
+<text x="16" y="257" fill="#e5e7eb" xml:space="preserve">   size: 8 bytes</text>
+<text x="16" y="276" fill="#86efac" xml:space="preserve">[TCP #1] /leave (A -&gt; B)</text>
+<text x="16" y="295" fill="#86efac" xml:space="preserve">   text: b'BYE|'</text>
+<text x="16" y="314" fill="#e5e7eb" xml:space="preserve">   size: 4 bytes</text>
+<text x="16" y="333" fill="#86efac" xml:space="preserve">[TCP #3] separate file connection (A -&gt; B): HI, FILE header, then the raw file bytes</text>
+<text x="16" y="352" fill="#86efac" xml:space="preserve">   text: b'HI|Wire|file|FILE|note.txt|11|hello world'</text>
+<text x="16" y="371" fill="#e5e7eb" xml:space="preserve">   size: 41 bytes</text>
+</g>
+</svg>

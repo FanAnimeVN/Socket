@@ -1,27 +1,26 @@
 """
-discovery.py - Phát hiện peer qua UDP: broadcast "mình đang online" + lắng nghe người khác.
+discovery.py - Phát hiện peer qua UDP: broadcast "mình đang online" + lắng nghe người khác + trạng thái online/away.
 
-Người phụ trách: NGỌC          Người review (teach-back): HUY
+Người phụ trách giải thích khi vấn đáp: NGỌC          Người review (teach-back): HUY
 Điểm rubric liên quan: UDP discovery, online list, status (15%) ; Error handling (10%)
-Đọc trước: đề mục 3.1, 3.2, 5.2; udp_broadcast_demo.py (file demo của đề); docs/PROTOCOL.md
+Đọc trước: đề mục 3.1, 3.2, 5.2; docs/PROTOCOL.md (mục 1). Test: tests/test_discovery.py.
+ĐỌC TIẾP: tcp_chat.py (chat với người vừa tìm thấy).
 
-----------------------------------------------------------------------------------------
-HAI THREAD CỦA FILE NÀY
-  * Broadcaster : cứ mỗi config.BROADCAST_INTERVAL (3 s) gửi   HELLO|<name>|<tcp_port>|<status>
-  * Listener    : nhận HELLO của người khác, cập nhật state.peers, và XÓA người im quá config.PEER_TIMEOUT (10 s)
-Thread nào đang chờ cái gì? (câu hỏi vấn đáp kinh điển)  Broadcaster chờ đồng hồ, Listener chờ gói UDP.
+HAI THREAD CỦA FILE NÀY (thread nào đang chờ cái gì? - câu hỏi vấn đáp kinh điển)
+  * Broadcaster : CHỜ ĐỒNG HỒ. Mỗi 3 giây gửi   HELLO|<name>|<tcp_port>|<status>   tới địa chỉ broadcast, cổng 9999.
+  * Listener    : CHỜ GÓI UDP. Mỗi vòng lặp: (1) recvfrom tối đa 1 giây, (2) gói hợp lệ thì cập nhật danh sách
+                  online trong state.py và báo "[*] Minh is online", (3) dọn người im quá 10 giây, báo "went offline".
+                  Vì sao recvfrom chỉ chờ 1 giây (settimeout)? Nếu chờ vô hạn thì lúc không ai gửi gì,
+                  bước (3) dọn người hết hạn sẽ không bao giờ chạy.
 
 CÁC BẪY
-  1. Nhiều instance chạy trên MỘT máy phải bind chung cổng 9999 -> cần SO_REUSEADDR TRƯỚC khi bind.
+  1. Nhiều instance chạy trên MỘT máy phải bind chung cổng 9999 -> SO_REUSEADDR, đặt TRƯỚC bind().
   2. Phải bật SO_BROADCAST thì mới gửi tới địa chỉ broadcast được.
-  3. Bạn nhận lại chính gói broadcast của mình -> phải bỏ qua (so tên). Vì vậy tên phải duy nhất.
-  4. recvfrom() chặn mãi nếu không có gói -> dùng sock.settimeout(1.0) để vòng lặp còn có dịp
-     (a) kiểm tra state.stop_event  (b) dọn peer hết hạn, kể cả khi không ai gửi gì.
-  5. Thông báo "online/offline" gọi ui.show_message NGOÀI data_lock (xem luật trong state.py).
-  6. Trên Windows nhiều card mạng (VPN, WSL, Hyper-V...) thì 255.255.255.255 có thể đi sai card
-     -> có tham số --bcast để đổi (vd 192.168.1.255). Thử trên 2 máy thật sớm (D6).
-  7. Gói UDP lạ/rác không được làm chết thread: parse lỗi thì bỏ qua gói đó.
-----------------------------------------------------------------------------------------
+  3. Mình cũng nhận lại chính gói broadcast của mình -> bỏ qua bằng cách so tên. Vì vậy tên phải duy nhất:
+     lúc khởi động, find_name_owner() nghe 3.5 giây xem đã có ai dùng tên mình chưa.
+  4. Thông báo online/offline in NGOÀI lock (state.update_peer đã nhả lock rồi mới trả về).
+  5. Windows nhiều card mạng (VPN, WSL, Hyper-V...) thì 255.255.255.255 có thể đi sai card -> tham số --bcast.
+  6. Gói UDP lạ/rác không được làm chết thread: parse_hello trả None thì bỏ qua gói đó.
 """
 import socket
 import threading
@@ -31,107 +30,176 @@ import config
 import state
 import ui
 
+_send_now = threading.Event()     # "công tắc đánh thức": bật lên thì broadcaster gửi ngay, không chờ nốt 3 giây
+
+
+# ======================================================================== gói HELLO
+def build_hello(name, tcp_port, status):
+    """Ghép gói HELLO (kiểu bytes, sẵn sàng gửi bằng sendto). Ví dụ: HELLO|Quan|5000|online"""
+    return f"HELLO|{name}|{tcp_port}|{status}".encode(config.ENCODING)
+
+
+def parse_hello(data):
+    """bytes -> (name, tcp_port:int, status), hoặc None nếu gói không hợp lệ."""
+    parts = data.decode(config.ENCODING, errors="replace").split("|")
+    if len(parts) != 4 or parts[0] != "HELLO":
+        return None
+    _, name, port_text, status = parts
+    if name == "" or not port_text.isdigit():
+        return None
+    port = int(port_text)
+    if not 1 <= port <= 65535 or status not in config.VALID_STATUS:
+        return None
+    return name, port, status
+
+
+# ======================================================================== socket UDP
+def _make_receiver_socket():
+    """Socket UDP để NGHE gói HELLO trên cổng config.UDP_PORT (9999)."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)       # SOCK_DGRAM = UDP (SOCK_STREAM mới là TCP)
+    # Cho phép nhiều chương trình (nhiều instance trên một máy) cùng bind một cổng. PHẢI đặt TRƯỚC bind().
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    if hasattr(socket, "SO_REUSEPORT"):                           # macOS/Linux cần thêm dòng này
+        try:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        except OSError:
+            pass
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    sock.bind(("", config.UDP_PORT))                              # "" = nghe trên MỌI card mạng
+    return sock
+
+
+def _make_sender_socket():
+    """Socket UDP để GỬI broadcast. Không cần bind (hệ điều hành tự chọn cổng nguồn)."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)    # bắt buộc bật thì mới gửi tới địa chỉ broadcast được
+    return sock
+
+
+# ======================================================================== khởi động
+def find_name_owner(name, seconds=config.NAME_CHECK_SECONDS):
+    """Gọi MỘT lần lúc khởi động. Nghe `seconds` giây (3.5 s, lâu hơn chu kỳ 3 s của mọi peer) xem có HELLO nào
+    mang tên `name` không. Lúc này mình chưa phát gì nên gói trùng tên chắc chắn là của người khác.
+    Trả về IP của người đang dùng tên đó, hoặc None nếu tên còn trống."""
+    sock = _make_receiver_socket()
+    sock.settimeout(0.5)
+    deadline = time.time() + seconds
+    try:
+        while time.time() < deadline:
+            try:
+                data, addr = sock.recvfrom(config.UDP_BUFFER_SIZE)
+            except socket.timeout:
+                continue
+            except OSError:
+                time.sleep(0.1)
+                continue
+            parsed = parse_hello(data)
+            if parsed is not None and parsed[0].lower() == name.lower():
+                return addr[0]
+        return None
+    finally:
+        sock.close()
+
 
 def start_discovery(name, tcp_port, bcast=config.DEFAULT_BCAST):
     """Khởi động 2 thread (broadcaster + listener) rồi trả về ngay (không chặn).
-
-    Việc cần làm:
-      1. Tạo socket UDP bằng _make_udp_socket().
-      2. threading.Thread(target=..., daemon=True) cho _broadcaster_loop và _listener_loop; .start().
-      daemon=True nghĩa là gì? Vì sao cần? (thoát chương trình mà thread vẫn chạy thì sao?)
-    """
-    raise NotImplementedError("TODO: start_discovery")
-
-
-def _make_udp_socket():
-    """Tạo + cấu hình socket UDP, trả về socket đã bind.
-
-    Việc cần làm (xem udp_broadcast_demo.py, hàm make_socket, rồi TỰ viết lại và chú thích từng dòng):
-      - socket.socket(AF_INET, SOCK_DGRAM)
-      - setsockopt SO_REUSEADDR (và SO_REUSEPORT nếu hệ điều hành có)  -- TRƯỚC bind
-      - setsockopt SO_BROADCAST
-      - bind(("", config.UDP_PORT))        # "" nghĩa là gì?
-    """
-    raise NotImplementedError("TODO: _make_udp_socket")
+    daemon=True: thoát chương trình thì thread tự chết theo, không giữ chương trình lại."""
+    listen_sock = _make_receiver_socket()
+    listen_sock.settimeout(1.0)
+    send_sock = _make_sender_socket()
+    threading.Thread(target=_broadcaster_loop, args=(send_sock, name, tcp_port, bcast), daemon=True, name="udp-broadcaster").start()
+    threading.Thread(target=_listener_loop, args=(listen_sock, name), daemon=True, name="udp-listener").start()
 
 
+# ======================================================================== thread 1: broadcaster
 def _broadcaster_loop(sock, name, tcp_port, bcast):
-    """Thread 1: gửi HELLO định kỳ cho tới khi state.stop_event được set.
+    warned = False                                  # chỉ báo lỗi mạng MỘT lần, khỏi spam mỗi 3 giây
+    while not state.is_stopped():
+        try:
+            sock.sendto(build_hello(name, tcp_port, state.get_status()), (bcast, config.UDP_PORT))
+            warned = False
+        except OSError as error:                    # mạng chập chờn: báo rồi thử lại, không để thread chết
+            if not warned:
+                ui.show_message(f"[!] Cannot broadcast to {bcast}: {error}")
+                warned = True
+        _send_now.wait(config.BROADCAST_INTERVAL)   # chờ 3 giây, hoặc tới khi có người đánh thức (đổi /status)
+        _send_now.clear()
 
-    Việc cần làm:
-      - Mỗi vòng: ghép  "HELLO|name|tcp_port|status"  (status lấy từ state.my_status, ĐỌC TRONG LOCK!)
-        -> encode -> sock.sendto(dữ_liệu, (bcast, config.UDP_PORT)).
-      - Chờ 3 giây giữa các lần. Gợi ý: state.stop_event.wait(config.BROADCAST_INTERVAL)
-        (khác gì time.sleep(3)? -> thoát được ngay khi /quit).
-      - Bọc try/except OSError: mạng chập chờn thì in cảnh báo, không chết thread.
-    """
-    raise NotImplementedError("TODO: _broadcaster_loop")
 
-
+# ======================================================================== thread 2: listener
 def _listener_loop(sock, my_name):
-    """Thread 2: nhận HELLO, cập nhật state.peers, dọn người hết hạn.
-
-    Việc cần làm (mỗi vòng):
-      1. sock.settimeout(1.0) (đặt một lần trước vòng lặp). recvfrom(1024) -> (data, addr).
-         Bắt socket.timeout -> không có gói, vẫn đi tiếp xuống bước dọn dẹp.
-      2. Gói đến: _parse_hello(data). Hợp lệ và tên != my_name thì:
-           - trong data_lock: nếu tên CHƯA có trong peers -> đánh dấu là "người mới"
-           - cập nhật peers[name] = {ip: addr[0], tcp_port, status, last_seen: time.time()}
-           - ra khỏi lock rồi mới ui.show_message("[*] Minh is online")
-         (Khi status đổi online<->away có cần thông báo không? Nhóm tự quyết, ghi vào PROTOCOL.md.)
-      3. _cleanup_expired(): xóa người có time.time() - last_seen > config.PEER_TIMEOUT,
-         rồi thông báo "[*] Minh went offline" (nhớ: thông báo NGOÀI lock).
-      4. Dừng khi state.stop_event.is_set().
-    """
-    raise NotImplementedError("TODO: _listener_loop")
+    while not state.is_stopped():
+        try:
+            data, addr = sock.recvfrom(config.UDP_BUFFER_SIZE)
+            _handle_packet(data, addr[0], my_name)
+        except socket.timeout:
+            pass                                    # 1 giây không có gói nào: bình thường, xuống bước dọn dẹp
+        except OSError:
+            time.sleep(0.2)                         # lỗi lạ (Windows đôi khi báo "connection reset" cho UDP): bỏ qua
+        for name in state.remove_expired_peers(config.PEER_TIMEOUT):
+            ui.show_message(f"[*] {name} went offline")
 
 
-def _parse_hello(data):
-    """Bytes -> (name, tcp_port:int, status) hoặc None nếu gói không hợp lệ.
-
-    Việc cần làm: decode (errors="replace"), split("|"), kiểm tra đủ 4 phần, phần đầu == "HELLO",
-    tcp_port đổi được sang int, status thuộc config.VALID_STATUS. Sai chỗ nào -> return None.
-    Test riêng hàm này bằng vài chuỗi tay (gói thiếu trường, port là chữ, status lạ...) trước khi ghép.
-    """
-    raise NotImplementedError("TODO: _parse_hello")
-
-
-def _cleanup_expired():
-    """Xóa peer hết hạn khỏi state.peers, trả về list tên đã bị xóa (để caller thông báo ngoài lock)."""
-    raise NotImplementedError("TODO: _cleanup_expired")
-
-
-def get_peers_sorted():
-    """Trả về list [(name, info_dict_copy), ...] sắp theo tên - một BẢN SAO, lấy trong data_lock.
-
-    Vì sao phải copy rồi trả về? (nếu trả thẳng state.peers, bên ngoài duyệt trong lúc thread khác sửa
-    -> lỗi "dictionary changed size during iteration".)
-    Sắp theo tên để số thứ tự trong /list ổn định, /chat <số> dùng lại đúng thứ tự đó.
-    """
-    raise NotImplementedError("TODO: get_peers_sorted")
+def _handle_packet(data, ip, my_name):
+    """Xử lý một gói UDP nhận được từ địa chỉ `ip`."""
+    parsed = parse_hello(data)
+    if parsed is None:
+        return                                      # gói rác: bỏ qua
+    name, tcp_port, status = parsed
+    if name.lower() == my_name.lower():
+        return                                      # gói do chính mình phát
+    result = state.update_peer(name, ip, tcp_port, status)
+    if result == "new":
+        suffix = "" if status == config.STATUS_ONLINE else f" ({status})"
+        ui.show_message(f"[*] {name} is online{suffix}")
+    elif result == "status":
+        ui.show_message(f"[*] {name} is now {status}")
 
 
+# ======================================================================== phục vụ các lệnh /list /chat /status
 def find_peer(arg):
-    """arg là tên hoặc số thứ tự (chuỗi, 1-based) -> trả về tên peer, hoặc None nếu không có/ngoài phạm vi.
-
-    Gợi ý: thử arg.isdigit() trước; dùng get_peers_sorted(). So tên: nên phân biệt hoa/thường hay không? Nhóm quyết.
-    """
-    raise NotImplementedError("TODO: find_peer")
+    """`arg` là tên hoặc số thứ tự (bắt đầu từ 1, theo /list). Trả về tên đúng, hoặc None nếu không có/ngoài phạm vi."""
+    arg = arg.strip()
+    items = state.get_peers_sorted()
+    if arg.isdigit():
+        index = int(arg)
+        return items[index - 1][0] if 1 <= index <= len(items) else None
+    for name, _ in items:                           # ưu tiên khớp chính xác, rồi tới không phân biệt hoa/thường
+        if name == arg:
+            return name
+    for name, _ in items:
+        if name.lower() == arg.lower():
+            return name
+    return None
 
 
 def format_peer_list():
-    """Trả về list các dòng để in cho /list, đúng mẫu của đề:
-         "  1. Minh   (192.168.1.12)  online"
-    Danh sách rỗng thì trả về một dòng thông báo kiểu "[*] Chưa thấy ai online".
-    Gợi ý căn cột: str.ljust(độ_rộng).
-    """
-    raise NotImplementedError("TODO: format_peer_list")
+    """Các dòng cho /list, đúng mẫu của đề:   "  1. Minh   (192.168.1.12)  online"
+    Thêm "[N unread]" nếu có tin chưa đọc, "<- chatting" cho người đang chat cùng."""
+    items = state.get_peers_sorted()
+    if not items:
+        return ["[*] Nobody else is online yet."]
+    partner = state.get_partner()
+    width = max(len(name) for name, _ in items)
+    lines = []
+    for number, (name, info) in enumerate(items, start=1):
+        line = f"  {number}. {name.ljust(width)}  ({info['ip']})  {info['status']}"
+        unread = state.unread_count(name)
+        if unread > 0:
+            line += f"  [{unread} unread]"
+        if name == partner:
+            line += "  <- chatting"
+        lines.append(line)
+    return lines
 
 
 def set_status(status):
-    """Đổi trạng thái của mình: "online" | "away" -> state.my_status (trong lock).
-
-    Việc cần làm: kiểm tra status hợp lệ (config.VALID_STATUS), sai thì báo lỗi. Gói HELLO KẾ TIẾP sẽ mang
-    status mới (trễ tối đa 3 giây) - hoặc (tùy chọn) gửi một HELLO ngay. Ghi quyết định vào report.
-    """
-    raise NotImplementedError("TODO: set_status")
+    """/status: đổi trạng thái của mình và gửi HELLO ngay (khỏi để người khác chờ tối đa 3 giây).
+    Trạng thái đi tới người khác QUA UDP, nằm sẵn trong gói HELLO. Trả về True nếu hợp lệ."""
+    status = status.strip().lower()
+    if not state.set_status(status):
+        ui.show_message(f"[*] Usage: /status <{'|'.join(config.VALID_STATUS)}>")
+        return False
+    _send_now.set()
+    ui.show_message(f"[*] Your status is now {status}")
+    return True

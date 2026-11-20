@@ -38,6 +38,10 @@ và **bắt tay 3 bước của TCP**, kèm giải thích ngắn.
 
 ## 4. Nơi lưu
 - Ảnh chụp: `docs/img/udp_broadcast.png`, `docs/img/tcp_handshake.png`, (tùy chọn) `docs/img/tcp_stream.png`.
+- Chèn vào `docs/BAO_CAO.md` **mục 7**: thay khối "CHƯA CÓ ẢNH" bằng ảnh (cú pháp ảnh Markdown, đường dẫn `img/tên_ảnh.png`),
+  giữ nguyên phần "Giải thích chuẩn bị sẵn" bên dưới mỗi ảnh. Báo cáo không chứa code nên chỉ chèn ảnh + lời giải thích.
+- Đối chiếu: byte thật chương trình gửi ra (không phải ảnh Wireshark) đã có ở `docs/evidence/wire_format.txt`; ảnh
+  "Follow TCP Stream" của bạn phải cho thấy cùng nội dung (`HI|...|chat|`, `MSG|<số byte>|...`).
 - File bắt gói `.pcapng` có thể rất lớn; đang bị `.gitignore` bỏ qua - giữ riêng trên máy.
 
 ## 5. Nếu không thấy gói nào

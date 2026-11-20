@@ -1,0 +1,53 @@
+MINH CHUNG: man hinh cua TestA trong test dau-cuoi (tests/test_end_to_end.py)
+
+[*] Checking that the name 'TestA' is free (3.5 s) ...
+[*] Listening on TCP port 55687
+[*] Broadcasting presence on UDP port 9999 (to 127.255.255.255)
+[*] Type /help for the list of commands
+[*] TestB is online
+[*] TestC is online
+  1. TestB  (127.0.0.1)  online
+  2. TestC  (127.0.0.1)  online
+[*] Connected to TestB (127.0.0.1:55688)
+[TestA] xin chào | ok
+[TestB] ok nhé
+[*] New message from TestC (1 unread)
+  1. TestB  (127.0.0.1)  online  <- chatting
+  2. TestC  (127.0.0.1)  online  [1 unread]
+[*] Switched to TestC
+[*] 1 unread:
+[TestC] hi from C
+[*] Switched to TestB
+[*] Recent messages:
+[TestA] xin chào | ok
+[TestB] ok nhé
+[*] Your status is now away
+[TestA] chat during transfer
+[*] Sending bao cao test.bin (3.0 MB) ...
+[*] Sending bao cao test.bin ... 10%
+[*] Sending bao cao test.bin ... 20%
+[*] Sending bao cao test.bin ... 31%
+[*] Sending bao cao test.bin ... 41%
+[*] Sending bao cao test.bin ... 52%
+[*] Sending bao cao test.bin ... 62%
+[*] Sending bao cao test.bin ... 72%
+[*] Sending bao cao test.bin ... 83%
+[*] Sending bao cao test.bin ... 93%
+[*] Sending bao cao test.bin (3.0 MB) ... 100%  Done.
+[!] No online user 'Nobody'. Type /list to see who is online.
+[!] File not found: no_such_file.xyz
+[!] Unknown command: /foo
+Commands (text without / is sent as a chat message):
+  /list                  show online users
+  /chat <name|number>    open a chat with a user
+  /send <file>           send a file to the current chat partner
+  /leave                 close the current chat
+  /status <online|away>  change your status
+  /help                  show this help
+  /quit                  exit the program
+[!] You cannot chat with yourself.
+[*] TestB left the chat. Chat closed.
+[*] TestC disconnected (connection lost).
+[!] Cannot connect to TestC: [WinError 10061] No connection could be made because the target machine actively refused it
+[*] TestC went offline
+[*] Bye!

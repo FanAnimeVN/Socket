@@ -1,0 +1,11 @@
+MINH CHUNG: man hinh cua TestC trong test dau-cuoi (tests/test_end_to_end.py)
+
+[*] Checking that the name 'TestC' is free (3.5 s) ...
+[*] Listening on TCP port 55689
+[*] Broadcasting presence on UDP port 9999 (to 127.255.255.255)
+[*] Type /help for the list of commands
+[*] TestB is online
+[*] TestA is online
+[*] Connected to TestA (127.0.0.1:55687)
+[TestC] hi from C
+[*] TestA is now away
